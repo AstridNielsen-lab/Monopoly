@@ -19,7 +19,7 @@ interface GameStore extends GameState {
 const INITIAL_MONEY = 1500;
 const SALARY = 200;
 const JAIL_FINE = 50;
-const TURN_DELAY = 2000; // 2 segundos entre cada turno
+const TURN_DELAY = 2000;
 
 export const useGameStore = create<GameStore>((set, get) => ({
   players: [],
@@ -51,7 +51,6 @@ export const useGameStore = create<GameStore>((set, get) => ({
         const player = state.players[state.currentPlayer];
         const property = state.properties[player.position];
         
-        // Estratégia simples: compra se tiver dinheiro suficiente e for mais de 2x o valor
         if (player.money > property.price * 2) {
           setTimeout(() => get().buyProperty(), 1000);
         } else {
@@ -60,10 +59,9 @@ export const useGameStore = create<GameStore>((set, get) => ({
       }
     };
 
-    // Inicia o autoplay
     const interval = setInterval(autoPlay, TURN_DELAY);
     set({ autoPlayInterval: interval, isAutoPlaying: true });
-    autoPlay(); // Inicia imediatamente
+    autoPlay();
   },
 
   stopAutoPlay: () => {
@@ -155,8 +153,11 @@ export const useGameStore = create<GameStore>((set, get) => ({
 
         get().movePlayer(totalSpaces);
 
+        // No modo manual, não chamamos endTurn automaticamente
         if (!isDoubles || player.inJail) {
-          setTimeout(() => get().endTurn(), 1000);
+          if (state.isAutoPlaying) {
+            setTimeout(() => get().endTurn(), 1000);
+          }
         } else {
           set({ canRoll: true });
           get().addGameLog(`${player.name} tirou dados iguais e joga novamente!`);
@@ -202,6 +203,10 @@ export const useGameStore = create<GameStore>((set, get) => ({
           }
         } else if (property.owner !== player.id && !property.mortgaged) {
           get().payRent();
+          // No modo manual, não finalizamos o turno automaticamente após pagar aluguel
+          if (state.isAutoPlaying) {
+            get().endTurn();
+          }
         }
         break;
 
@@ -214,6 +219,10 @@ export const useGameStore = create<GameStore>((set, get) => ({
         });
         get().addGameLog(`${player.name} pagou $${taxAmount} de taxa.`);
         get().checkGameOver();
+        // No modo manual, não finalizamos o turno automaticamente após pagar taxa
+        if (state.isAutoPlaying) {
+          get().endTurn();
+        }
         break;
 
       case 'corner':
@@ -226,6 +235,10 @@ export const useGameStore = create<GameStore>((set, get) => ({
             return { players };
           });
           get().addGameLog(`${player.name} foi para a prisão!`);
+          // No modo manual, não finalizamos o turno automaticamente ao ir para a prisão
+          if (state.isAutoPlaying) {
+            get().endTurn();
+          }
         }
         break;
     }
@@ -249,6 +262,11 @@ export const useGameStore = create<GameStore>((set, get) => ({
       });
       
       get().addGameLog(`${player.name} comprou ${property.name} por $${property.price}!`);
+      
+      // No modo manual, não finalizamos o turno automaticamente após comprar
+      if (state.isAutoPlaying) {
+        get().endTurn();
+      }
     }
   },
 
@@ -272,12 +290,11 @@ export const useGameStore = create<GameStore>((set, get) => ({
       const diceSum = state.dice[0] + state.dice[1];
       rentAmount = property.rent[utilitiesOwned - 1] * diceSum;
     } else if (property.type === 'property') {
-      // Verifica se o proprietário tem o monopólio da cor
       const propertiesOfColor = state.properties.filter(p => p.color === property.color);
       const ownerHasMonopoly = propertiesOfColor.every(p => p.owner === owner.id);
       
       if (ownerHasMonopoly && property.houses === 0) {
-        rentAmount = property.rent[0] * 2; // Dobra o aluguel para monopólios sem casas
+        rentAmount = property.rent[0] * 2;
       }
     }
 
@@ -300,14 +317,12 @@ export const useGameStore = create<GameStore>((set, get) => ({
     const currentPlayer = state.players[state.currentPlayer];
     
     if (currentPlayer.money < 0) {
-      // Jogador faliu
       const totalAssets = currentPlayer.properties.reduce((total, propId) => {
         const property = state.properties[propId];
         return total + property.price + (property.houses * (property.price / 2));
       }, 0);
       
       if (totalAssets + currentPlayer.money < 0) {
-        // Remove o jogador do jogo
         set((state) => {
           const players = state.players.filter(p => p.id !== currentPlayer.id);
           const properties = state.properties.map(p => {

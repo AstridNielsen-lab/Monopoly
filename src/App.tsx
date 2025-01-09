@@ -171,7 +171,7 @@ function App() {
                   )}
                   <Board />
                   <Dice />
-                  {canBuy && currentProperty && !isAutoPlaying && (
+                  {canBuy && currentProperty && gameMode === 'manual' && (
                     <div className="flex gap-4">
                       <button
                         onClick={() => buyProperty()}
@@ -187,7 +187,7 @@ function App() {
                       </button>
                     </div>
                   )}
-                  {gameMode === 'manual' && !canBuy && !isAutoPlaying && (
+                  {gameMode === 'manual' && !canBuy && (
                     <button
                       onClick={() => endTurn()}
                       className="px-6 py-2 bg-emerald-500 text-white rounded-xl hover:bg-emerald-600 transition-all transform hover:scale-105"
