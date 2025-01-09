@@ -7,6 +7,7 @@ export interface Player {
   inJail: boolean;
   jailTurns: number;
   color: string;
+  doublesCount: number;
 }
 
 export interface Property {
