@@ -1,9 +1,7 @@
 import React from 'react';
 import { useGameStore } from '../store/gameStore';
 import { cn } from '../lib/utils';
-import { Building, Train, Lightbulb, HelpCircle, Coins, PiggyBank, Home, MapPin } from 'lucide-react';
-
-const BOARD_SIZE = 11;
+import { Building, Train, Lightbulb, HelpCircle, Coins, PiggyBank, Home, MapPin, DollarSign } from 'lucide-react';
 
 export const Board: React.FC = () => {
   const { players, properties } = useGameStore();
@@ -48,21 +46,23 @@ export const Board: React.FC = () => {
     return (
       <div 
         className={cn(
-          "relative transition-transform duration-300 hover:scale-105",
-          isCorner ? "w-36 h-36" : "w-24 h-36",
-          "border border-gray-200 bg-white/95 backdrop-blur-sm p-2 flex flex-col",
+          "relative transition-all duration-300 hover:scale-105 group",
+          isCorner ? "w-32 h-32" : "w-20 h-32",
+          "border border-gray-200 bg-white/95 backdrop-blur-sm",
           "shadow-lg hover:shadow-xl",
           rotation
         )}
       >
         {/* Barra de cor da propriedade */}
-        <div className={cn(
-          "h-6 w-full rounded-t-sm transition-all duration-300",
-          property.color && getPropertyColor(property.color),
-          "hover:h-8"
-        )} />
+        {property.color && (
+          <div className={cn(
+            "h-6 w-full transition-all duration-300",
+            getPropertyColor(property.color),
+            "group-hover:h-8"
+          )} />
+        )}
         
-        <div className="flex-1 flex flex-col justify-between p-1">
+        <div className="flex-1 flex flex-col justify-between p-2 relative">
           {/* Nome da propriedade */}
           <div className="text-xs font-medium text-center leading-tight">
             {property.name}
@@ -70,8 +70,9 @@ export const Board: React.FC = () => {
           
           {/* Preço */}
           {property.price > 0 && (
-            <div className="text-xs text-center font-bold bg-emerald-50 rounded-full px-2 py-1 mt-1">
-              ${property.price}
+            <div className="flex items-center justify-center gap-1 text-xs font-bold text-emerald-700 bg-emerald-50 rounded-full px-2 py-1 mt-1">
+              <DollarSign className="w-3 h-3" />
+              {property.price}
             </div>
           )}
 
@@ -85,20 +86,20 @@ export const Board: React.FC = () => {
           )}
 
           {/* Ícone central */}
-          <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 opacity-20">
+          <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 opacity-10 scale-150">
             {getPropertyIcon(property.type)}
           </div>
 
           {/* Jogadores na casa */}
           {playerTokens.length > 0 && (
-            <div className="absolute bottom-2 left-1 right-1 flex flex-wrap gap-1 justify-center">
+            <div className="absolute -bottom-2 left-1/2 transform -translate-x-1/2 flex -space-x-2">
               {playerTokens.map((player) => (
                 <div
                   key={player.id}
                   className={cn(
-                    "w-5 h-5 rounded-full border-2 border-white shadow-lg flex items-center justify-center",
+                    "w-6 h-6 rounded-full border-2 border-white shadow-lg flex items-center justify-center",
                     `bg-${player.color}-500`,
-                    "transform hover:scale-110 transition-all duration-300"
+                    "transform hover:scale-110 transition-all duration-300 hover:z-10"
                   )}
                 >
                   <MapPin className="w-3 h-3 text-white" />
@@ -118,7 +119,7 @@ export const Board: React.FC = () => {
 
   return (
     <div className="relative transform hover:scale-[1.02] transition-all duration-500">
-      <div className="grid grid-cols-11 gap-1 bg-emerald-100/30 p-4 rounded-3xl shadow-2xl backdrop-blur-sm">
+      <div className="grid grid-cols-11 gap-1 bg-emerald-100/30 p-8 rounded-3xl shadow-2xl backdrop-blur-sm">
         {/* Top row */}
         {topRow.map((prop) => (
           <div key={prop.id}>{renderSpace(prop, '-rotate-180')}</div>
@@ -133,10 +134,16 @@ export const Board: React.FC = () => {
           </div>
 
           {/* Centro do tabuleiro */}
-          <div className="flex items-center justify-center p-8 bg-white/40 backdrop-blur-md m-4 rounded-3xl shadow-inner">
-            <h1 className="text-7xl font-black text-emerald-800/80 rotate-45 tracking-tight">
-              MONOPOLY
-            </h1>
+          <div className="flex items-center justify-center p-12 bg-white/40 backdrop-blur-md m-8 rounded-3xl shadow-inner relative overflow-hidden">
+            <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/10 to-emerald-600/10" />
+            <div className="relative">
+              <h1 className="text-7xl font-black text-emerald-800/80 rotate-45 tracking-tight">
+                MONOPOLY
+              </h1>
+              <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 rotate-45">
+                <DollarSign className="w-32 h-32 text-emerald-500/20" />
+              </div>
+            </div>
           </div>
 
           {/* Right column */}
