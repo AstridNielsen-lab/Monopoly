@@ -3,12 +3,13 @@ import { Board } from './components/Board';
 import { Dice } from './components/Dice';
 import { PlayerInfo } from './components/PlayerInfo';
 import { useGameStore } from './store/gameStore';
-import { Trophy, DollarSign, Play, Pause } from 'lucide-react';
+import { Trophy, DollarSign, Play, Pause, Users, Bot } from 'lucide-react';
 import { cn } from './lib/utils';
 
 function App() {
   const [isGameStarted, setIsGameStarted] = useState(false);
   const [playerName, setPlayerName] = useState('');
+  const [gameMode, setGameMode] = useState<'manual' | 'auto'>('manual');
   const { 
     addPlayer, 
     players,
@@ -34,15 +35,19 @@ function App() {
   const startGame = () => {
     if (players.length >= 2) {
       setIsGameStarted(true);
-      startAutoPlay(); // Inicia o jogo automático
+      if (gameMode === 'auto') {
+        startAutoPlay();
+      }
     }
   };
 
   const toggleAutoPlay = () => {
     if (isAutoPlaying) {
       stopAutoPlay();
+      setGameMode('manual');
     } else {
       startAutoPlay();
+      setGameMode('auto');
     }
   };
 
@@ -97,6 +102,37 @@ function App() {
             ))}
           </div>
 
+          {/* Seleção de modo de jogo */}
+          <div className="mb-6">
+            <h3 className="font-bold text-emerald-800 mb-3">Game Mode:</h3>
+            <div className="grid grid-cols-2 gap-3">
+              <button
+                onClick={() => setGameMode('manual')}
+                className={cn(
+                  "flex items-center justify-center gap-2 p-3 rounded-xl transition-all",
+                  gameMode === 'manual'
+                    ? "bg-emerald-500 text-white"
+                    : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                )}
+              >
+                <Users className="w-5 h-5" />
+                Manual
+              </button>
+              <button
+                onClick={() => setGameMode('auto')}
+                className={cn(
+                  "flex items-center justify-center gap-2 p-3 rounded-xl transition-all",
+                  gameMode === 'auto'
+                    ? "bg-emerald-500 text-white"
+                    : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                )}
+              >
+                <Bot className="w-5 h-5" />
+                Auto
+              </button>
+            </div>
+          </div>
+
           <button
             onClick={startGame}
             disabled={players.length < 2}
@@ -115,40 +151,52 @@ function App() {
         <div className="grid grid-cols-[1fr_auto_1fr] gap-8">
           <PlayerInfo />
           <div className="flex flex-col items-center gap-8">
-            <button
-              onClick={toggleAutoPlay}
-              className={cn(
-                "px-6 py-2 rounded-xl text-white flex items-center gap-2 transition-all",
-                isAutoPlaying ? "bg-red-500 hover:bg-red-600" : "bg-emerald-500 hover:bg-emerald-600"
-              )}
-            >
-              {isAutoPlaying ? (
-                <>
-                  <Pause className="w-4 h-4" /> Pause
-                </>
-              ) : (
-                <>
-                  <Play className="w-4 h-4" /> Continue
-                </>
-              )}
-            </button>
+            {/* Botão de alternar modo só aparece se o jogo começou em modo automático */}
+            {gameMode === 'auto' && (
+              <button
+                onClick={toggleAutoPlay}
+                className={cn(
+                  "px-6 py-2 rounded-xl text-white flex items-center gap-2 transition-all",
+                  isAutoPlaying ? "bg-red-500 hover:bg-red-600" : "bg-emerald-500 hover:bg-emerald-600"
+                )}
+              >
+                {isAutoPlaying ? (
+                  <>
+                    <Pause className="w-4 h-4" /> Pause
+                  </>
+                ) : (
+                  <>
+                    <Play className="w-4 h-4" /> Continue
+                  </>
+                )}
+              </button>
+            )}
             <Board />
             <Dice />
             {canBuy && currentProperty && !isAutoPlaying && (
               <div className="flex gap-4">
                 <button
                   onClick={() => buyProperty()}
-                  className="px-6 py-2 bg-emerald-500 text-white rounded-xl hover:bg-emerald-600"
+                  className="px-6 py-2 bg-emerald-500 text-white rounded-xl hover:bg-emerald-600 transition-all transform hover:scale-105"
                 >
                   Comprar por ${currentProperty.price}
                 </button>
                 <button
                   onClick={() => endTurn()}
-                  className="px-6 py-2 bg-gray-500 text-white rounded-xl hover:bg-gray-600"
+                  className="px-6 py-2 bg-gray-500 text-white rounded-xl hover:bg-gray-600 transition-all transform hover:scale-105"
                 >
                   Passar
                 </button>
               </div>
+            )}
+            {/* Botão de finalizar turno para modo manual */}
+            {gameMode === 'manual' && !canBuy && !isAutoPlaying && (
+              <button
+                onClick={() => endTurn()}
+                className="px-6 py-2 bg-emerald-500 text-white rounded-xl hover:bg-emerald-600 transition-all transform hover:scale-105"
+              >
+                Finalizar Turno
+              </button>
             )}
           </div>
           <div className="bg-white/90 backdrop-blur-sm p-6 rounded-2xl shadow-xl">
