@@ -12,11 +12,14 @@ interface GameStore extends GameState {
   handleSpecialSpace: () => void;
   addGameLog: (message: string) => void;
   checkGameOver: () => void;
+  startAutoPlay: () => void;
+  stopAutoPlay: () => void;
 }
 
 const INITIAL_MONEY = 1500;
 const SALARY = 200;
 const JAIL_FINE = 50;
+const TURN_DELAY = 2000; // 2 segundos entre cada turno
 
 export const useGameStore = create<GameStore>((set, get) => ({
   players: [],
@@ -27,11 +30,48 @@ export const useGameStore = create<GameStore>((set, get) => ({
   gameLog: [],
   canBuy: false,
   canRoll: true,
+  autoPlayInterval: null as any,
+  isAutoPlaying: false,
 
   addGameLog: (message: string) => {
     set((state) => ({
       gameLog: [{ message, timestamp: new Date().toISOString() }, ...state.gameLog]
     }));
+  },
+
+  startAutoPlay: () => {
+    const autoPlay = () => {
+      const state = get();
+      if (state.canRoll) {
+        get().rollDice();
+      }
+      
+      // Decisão automática de compra
+      if (state.canBuy) {
+        const player = state.players[state.currentPlayer];
+        const property = state.properties[player.position];
+        
+        // Estratégia simples: compra se tiver dinheiro suficiente e for mais de 2x o valor
+        if (player.money > property.price * 2) {
+          setTimeout(() => get().buyProperty(), 1000);
+        } else {
+          setTimeout(() => get().endTurn(), 1000);
+        }
+      }
+    };
+
+    // Inicia o autoplay
+    const interval = setInterval(autoPlay, TURN_DELAY);
+    set({ autoPlayInterval: interval, isAutoPlaying: true });
+    autoPlay(); // Inicia imediatamente
+  },
+
+  stopAutoPlay: () => {
+    const state = get() as any;
+    if (state.autoPlayInterval) {
+      clearInterval(state.autoPlayInterval);
+      set({ autoPlayInterval: null, isAutoPlaying: false });
+    }
   },
 
   addPlayer: (name: string) => {
@@ -96,13 +136,11 @@ export const useGameStore = create<GameStore>((set, get) => ({
           });
         }
       } else {
-        // Atualiza o contador de dados iguais
         set((state) => {
           const players = [...state.players];
           if (isDoubles) {
             players[state.currentPlayer].doublesCount++;
             if (players[state.currentPlayer].doublesCount === 3) {
-              // Três dados iguais seguidos = vai para a prisão
               players[state.currentPlayer].position = 10;
               players[state.currentPlayer].inJail = true;
               players[state.currentPlayer].doublesCount = 0;
@@ -117,7 +155,6 @@ export const useGameStore = create<GameStore>((set, get) => ({
 
         get().movePlayer(totalSpaces);
 
-        // Se não tirou dados iguais ou está na prisão, termina o turno
         if (!isDoubles || player.inJail) {
           setTimeout(() => get().endTurn(), 1000);
         } else {

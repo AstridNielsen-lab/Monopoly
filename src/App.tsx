@@ -3,15 +3,18 @@ import { Board } from './components/Board';
 import { Dice } from './components/Dice';
 import { PlayerInfo } from './components/PlayerInfo';
 import { useGameStore } from './store/gameStore';
-import { Trophy, DollarSign } from 'lucide-react';
-import { cn } from './lib/utils'; // Adicionando a importação do cn
+import { Trophy, DollarSign, Play, Pause } from 'lucide-react';
+import { cn } from './lib/utils';
 
 function App() {
   const [isGameStarted, setIsGameStarted] = useState(false);
   const [playerName, setPlayerName] = useState('');
   const { 
     addPlayer, 
-    players, 
+    players,
+    startAutoPlay,
+    stopAutoPlay,
+    isAutoPlaying,
     gameLog,
     currentPlayer,
     properties,
@@ -31,6 +34,15 @@ function App() {
   const startGame = () => {
     if (players.length >= 2) {
       setIsGameStarted(true);
+      startAutoPlay(); // Inicia o jogo automático
+    }
+  };
+
+  const toggleAutoPlay = () => {
+    if (isAutoPlaying) {
+      stopAutoPlay();
+    } else {
+      startAutoPlay();
     }
   };
 
@@ -103,9 +115,26 @@ function App() {
         <div className="grid grid-cols-[1fr_auto_1fr] gap-8">
           <PlayerInfo />
           <div className="flex flex-col items-center gap-8">
+            <button
+              onClick={toggleAutoPlay}
+              className={cn(
+                "px-6 py-2 rounded-xl text-white flex items-center gap-2 transition-all",
+                isAutoPlaying ? "bg-red-500 hover:bg-red-600" : "bg-emerald-500 hover:bg-emerald-600"
+              )}
+            >
+              {isAutoPlaying ? (
+                <>
+                  <Pause className="w-4 h-4" /> Pause
+                </>
+              ) : (
+                <>
+                  <Play className="w-4 h-4" /> Continue
+                </>
+              )}
+            </button>
             <Board />
             <Dice />
-            {canBuy && currentProperty && (
+            {canBuy && currentProperty && !isAutoPlaying && (
               <div className="flex gap-4">
                 <button
                   onClick={() => buyProperty()}
