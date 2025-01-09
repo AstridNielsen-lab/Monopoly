@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Board } from './components/Board';
 import { Dice } from './components/Dice';
 import { PlayerInfo } from './components/PlayerInfo';
+import { Footer } from './components/Footer';
 import { useGameStore } from './store/gameStore';
 import { Trophy, DollarSign, Play, Pause, Users, Bot } from 'lucide-react';
 import { cn } from './lib/utils';
@@ -53,170 +54,170 @@ function App() {
 
   const currentProperty = properties[players[currentPlayer]?.position];
 
-  if (!isGameStarted) {
-    return (
-      <div className="min-h-screen flex items-center justify-center p-4">
-        <div className="bg-white/90 backdrop-blur-sm p-8 rounded-2xl shadow-2xl max-w-md w-full">
-          <div className="flex items-center justify-center mb-6">
-            <Trophy className="w-12 h-12 text-yellow-500 animate-pulse" />
-            <h1 className="text-4xl font-bold bg-gradient-to-r from-yellow-500 to-yellow-600 bg-clip-text text-transparent ml-2">
-              Monopoly
-            </h1>
-          </div>
-          
-          <form onSubmit={handleAddPlayer} className="space-y-4 mb-6">
-            <input
-              type="text"
-              value={playerName}
-              onChange={(e) => setPlayerName(e.target.value)}
-              placeholder="Enter player name"
-              className="w-full px-4 py-3 border-2 border-emerald-200 rounded-xl focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 transition-all"
-            />
-            <button
-              type="submit"
-              className="w-full bg-emerald-500 text-white py-3 rounded-xl hover:bg-emerald-600 transform hover:scale-105 transition-all shadow-lg"
-            >
-              Add Player
-            </button>
-          </form>
-
-          <div className="mb-6 bg-emerald-50 p-4 rounded-xl">
-            <h2 className="font-bold text-emerald-800 mb-2">Players:</h2>
-            {players.map((player) => (
-              <div
-                key={player.id}
-                className="py-2 px-4 bg-white rounded-lg mb-2 shadow flex items-center"
-              >
-                <div
-                  className={cn(
-                    "w-3 h-3 rounded-full mr-2",
-                    `bg-${player.color}-500`
-                  )}
-                />
-                <span className="font-medium">{player.name}</span>
-                <span className="ml-auto text-emerald-600 flex items-center">
-                  <DollarSign className="w-4 h-4 mr-1" />
-                  {player.money}
-                </span>
-              </div>
-            ))}
-          </div>
-
-          {/* Seleção de modo de jogo */}
-          <div className="mb-6">
-            <h3 className="font-bold text-emerald-800 mb-3">Game Mode:</h3>
-            <div className="grid grid-cols-2 gap-3">
-              <button
-                onClick={() => setGameMode('manual')}
-                className={cn(
-                  "flex items-center justify-center gap-2 p-3 rounded-xl transition-all",
-                  gameMode === 'manual'
-                    ? "bg-emerald-500 text-white"
-                    : "bg-gray-100 text-gray-600 hover:bg-gray-200"
-                )}
-              >
-                <Users className="w-5 h-5" />
-                Manual
-              </button>
-              <button
-                onClick={() => setGameMode('auto')}
-                className={cn(
-                  "flex items-center justify-center gap-2 p-3 rounded-xl transition-all",
-                  gameMode === 'auto'
-                    ? "bg-emerald-500 text-white"
-                    : "bg-gray-100 text-gray-600 hover:bg-gray-200"
-                )}
-              >
-                <Bot className="w-5 h-5" />
-                Auto
-              </button>
-            </div>
-          </div>
-
-          <button
-            onClick={startGame}
-            disabled={players.length < 2}
-            className="w-full bg-yellow-500 text-white py-3 rounded-xl hover:bg-yellow-600 disabled:opacity-50 disabled:cursor-not-allowed transform hover:scale-105 transition-all shadow-lg font-bold"
-          >
-            Start Game ({players.length}/2 players)
-          </button>
-        </div>
-      </div>
-    );
-  }
-
   return (
-    <div className="min-h-screen p-8">
-      <div className="max-w-7xl mx-auto">
-        <div className="grid grid-cols-[1fr_auto_1fr] gap-8">
-          <PlayerInfo />
-          <div className="flex flex-col items-center gap-8">
-            {/* Botão de alternar modo só aparece se o jogo começou em modo automático */}
-            {gameMode === 'auto' && (
-              <button
-                onClick={toggleAutoPlay}
-                className={cn(
-                  "px-6 py-2 rounded-xl text-white flex items-center gap-2 transition-all",
-                  isAutoPlaying ? "bg-red-500 hover:bg-red-600" : "bg-emerald-500 hover:bg-emerald-600"
-                )}
-              >
-                {isAutoPlaying ? (
-                  <>
-                    <Pause className="w-4 h-4" /> Pause
-                  </>
-                ) : (
-                  <>
-                    <Play className="w-4 h-4" /> Continue
-                  </>
-                )}
-              </button>
-            )}
-            <Board />
-            <Dice />
-            {canBuy && currentProperty && !isAutoPlaying && (
-              <div className="flex gap-4">
-                <button
-                  onClick={() => buyProperty()}
-                  className="px-6 py-2 bg-emerald-500 text-white rounded-xl hover:bg-emerald-600 transition-all transform hover:scale-105"
-                >
-                  Comprar por ${currentProperty.price}
-                </button>
-                <button
-                  onClick={() => endTurn()}
-                  className="px-6 py-2 bg-gray-500 text-white rounded-xl hover:bg-gray-600 transition-all transform hover:scale-105"
-                >
-                  Passar
-                </button>
+    <div className="min-h-screen flex flex-col">
+      <main className="flex-grow">
+        {!isGameStarted ? (
+          <div className="min-h-screen flex items-center justify-center p-4">
+            <div className="bg-white/90 backdrop-blur-sm p-8 rounded-2xl shadow-2xl max-w-md w-full">
+              <div className="flex items-center justify-center mb-6">
+                <Trophy className="w-12 h-12 text-yellow-500 animate-pulse" />
+                <h1 className="text-4xl font-bold bg-gradient-to-r from-yellow-500 to-yellow-600 bg-clip-text text-transparent ml-2">
+                  Monopoly
+                </h1>
               </div>
-            )}
-            {/* Botão de finalizar turno para modo manual */}
-            {gameMode === 'manual' && !canBuy && !isAutoPlaying && (
-              <button
-                onClick={() => endTurn()}
-                className="px-6 py-2 bg-emerald-500 text-white rounded-xl hover:bg-emerald-600 transition-all transform hover:scale-105"
-              >
-                Finalizar Turno
-              </button>
-            )}
-          </div>
-          <div className="bg-white/90 backdrop-blur-sm p-6 rounded-2xl shadow-xl">
-            <h2 className="text-2xl font-bold text-emerald-800 mb-4 flex items-center">
-              Game Log
-              <Trophy className="w-6 h-6 text-yellow-500 ml-2" />
-            </h2>
-            <div className="space-y-2 max-h-[600px] overflow-y-auto">
-              {gameLog.map((log, index) => (
-                <div
-                  key={index}
-                  className="text-sm p-2 bg-emerald-50 rounded-lg"
+              
+              <form onSubmit={handleAddPlayer} className="space-y-4 mb-6">
+                <input
+                  type="text"
+                  value={playerName}
+                  onChange={(e) => setPlayerName(e.target.value)}
+                  placeholder="Digite o nome do jogador"
+                  className="w-full px-4 py-3 border-2 border-emerald-200 rounded-xl focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 transition-all"
+                />
+                <button
+                  type="submit"
+                  className="w-full bg-emerald-500 text-white py-3 rounded-xl hover:bg-emerald-600 transform hover:scale-105 transition-all shadow-lg"
                 >
-                  {log.message}
+                  Adicionar Jogador
+                </button>
+              </form>
+
+              <div className="mb-6 bg-emerald-50 p-4 rounded-xl">
+                <h2 className="font-bold text-emerald-800 mb-2">Jogadores:</h2>
+                {players.map((player) => (
+                  <div
+                    key={player.id}
+                    className="py-2 px-4 bg-white rounded-lg mb-2 shadow flex items-center"
+                  >
+                    <div
+                      className={cn(
+                        "w-3 h-3 rounded-full mr-2",
+                        `bg-${player.color}-500`
+                      )}
+                    />
+                    <span className="font-medium">{player.name}</span>
+                    <span className="ml-auto text-emerald-600 flex items-center">
+                      <DollarSign className="w-4 h-4 mr-1" />
+                      {player.money}
+                    </span>
+                  </div>
+                ))}
+              </div>
+
+              <div className="mb-6">
+                <h3 className="font-bold text-emerald-800 mb-3">Modo de Jogo:</h3>
+                <div className="grid grid-cols-2 gap-3">
+                  <button
+                    onClick={() => setGameMode('manual')}
+                    className={cn(
+                      "flex items-center justify-center gap-2 p-3 rounded-xl transition-all",
+                      gameMode === 'manual'
+                        ? "bg-emerald-500 text-white"
+                        : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                    )}
+                  >
+                    <Users className="w-5 h-5" />
+                    Manual
+                  </button>
+                  <button
+                    onClick={() => setGameMode('auto')}
+                    className={cn(
+                      "flex items-center justify-center gap-2 p-3 rounded-xl transition-all",
+                      gameMode === 'auto'
+                        ? "bg-emerald-500 text-white"
+                        : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                    )}
+                  >
+                    <Bot className="w-5 h-5" />
+                    Automático
+                  </button>
                 </div>
-              ))}
+              </div>
+
+              <button
+                onClick={startGame}
+                disabled={players.length < 2}
+                className="w-full bg-yellow-500 text-white py-3 rounded-xl hover:bg-yellow-600 disabled:opacity-50 disabled:cursor-not-allowed transform hover:scale-105 transition-all shadow-lg font-bold"
+              >
+                Iniciar Jogo ({players.length}/2 jogadores)
+              </button>
             </div>
           </div>
-        </div>
-      </div>
+        ) : (
+          <div className="p-8">
+            <div className="max-w-7xl mx-auto">
+              <div className="grid grid-cols-[1fr_auto_1fr] gap-8">
+                <PlayerInfo />
+                <div className="flex flex-col items-center gap-8">
+                  {gameMode === 'auto' && (
+                    <button
+                      onClick={toggleAutoPlay}
+                      className={cn(
+                        "px-6 py-2 rounded-xl text-white flex items-center gap-2 transition-all",
+                        isAutoPlaying ? "bg-red-500 hover:bg-red-600" : "bg-emerald-500 hover:bg-emerald-600"
+                      )}
+                    >
+                      {isAutoPlaying ? (
+                        <>
+                          <Pause className="w-4 h-4" /> Pausar
+                        </>
+                      ) : (
+                        <>
+                          <Play className="w-4 h-4" /> Continuar
+                        </>
+                      )}
+                    </button>
+                  )}
+                  <Board />
+                  <Dice />
+                  {canBuy && currentProperty && !isAutoPlaying && (
+                    <div className="flex gap-4">
+                      <button
+                        onClick={() => buyProperty()}
+                        className="px-6 py-2 bg-emerald-500 text-white rounded-xl hover:bg-emerald-600 transition-all transform hover:scale-105"
+                      >
+                        Comprar por ${currentProperty.price}
+                      </button>
+                      <button
+                        onClick={() => endTurn()}
+                        className="px-6 py-2 bg-gray-500 text-white rounded-xl hover:bg-gray-600 transition-all transform hover:scale-105"
+                      >
+                        Passar
+                      </button>
+                    </div>
+                  )}
+                  {gameMode === 'manual' && !canBuy && !isAutoPlaying && (
+                    <button
+                      onClick={() => endTurn()}
+                      className="px-6 py-2 bg-emerald-500 text-white rounded-xl hover:bg-emerald-600 transition-all transform hover:scale-105"
+                    >
+                      Finalizar Turno
+                    </button>
+                  )}
+                </div>
+                <div className="bg-white/90 backdrop-blur-sm p-6 rounded-2xl shadow-xl">
+                  <h2 className="text-2xl font-bold text-emerald-800 mb-4 flex items-center">
+                    Histórico do Jogo
+                    <Trophy className="w-6 h-6 text-yellow-500 ml-2" />
+                  </h2>
+                  <div className="space-y-2 max-h-[600px] overflow-y-auto">
+                    {gameLog.map((log, index) => (
+                      <div
+                        key={index}
+                        className="text-sm p-2 bg-emerald-50 rounded-lg"
+                      >
+                        {log.message}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+      </main>
+      <Footer />
     </div>
   );
 }
